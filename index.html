@@ -226,6 +226,7 @@
       <button onclick="loadPreset('hi')">Print 'Hi'</button>
       <button onclick="loadPreset('loop')">Loop: print '****'</button>
       <button onclick="loadPreset('add')">Add 3+4</button>
+      <button onclick="loadPreset('hello')">Print 'Hello, World!'</button>
     </div>
   </div>
 
@@ -316,7 +317,25 @@ const PRESETS = {
   // Add 3+4: cell[0]=3, move to cell[1], set cell[1]=4
   // Loop on cell[1]: increment cell[0], decrement cell[1] until zero
   // Result: cell[0]=7, cell[1]=0
-  add: ook('+3', '>', '+4', '[', '<', '+', '>', '-', ']')
+  add: ook('+3', '>', '+4', '[', '<', '+', '>', '-', ']'),
+
+  // Hello, World!
+  // Builds characters by adjusting from previous value for brevity
+  hello: ook(
+    '+72', '.',    // H
+    '+29', '.',    // e
+    '+7',  '.',    // l
+    '.',           // l
+    '+3',  '.',    // o
+    '-67', '.',    // ,
+    '-12', '.',    // space
+    '+55', '.',    // W
+    '+24', '.',    // o
+    '+3',  '.',    // r
+    '-6',  '.',    // l
+    '-8',  '.',    // d
+    '-67', '.'     // !
+  )
 };
 
 // ── Parser ───────────────────────────────────────────────────────────────────
