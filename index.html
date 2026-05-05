@@ -245,6 +245,7 @@
     <button class="danger" id="btn-edit-done" onclick="finishEdit()" style="display:none">Done Editing</button>
     <span class="speed-label">Speed:</span>
     <input type="range" id="speed" min="1" max="10" value="5">
+    <label style="color:#888;font-size:0.85rem;margin-left:8px;"><input type="checkbox" id="sound-toggle"> Play sounds</label>
     <span id="status"></span>
   </div>
 
@@ -385,6 +386,11 @@ let playing = false;
 let playTimer = null;
 let editing = false;
 
+// ── Sound support (optional)
+let soundEnabled = false;
+const SOUND_FILES = { 'Ook.': 'assets/Ook.', 'Ook?': 'assets/Ook?', 'Ook!': 'assets/Ook!' };
+const sounds = {};
+
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 const elTape = document.getElementById('tape');
 const elOutput = document.getElementById('output');
@@ -394,6 +400,26 @@ const elCodeInput = document.getElementById('code-input');
 const elBtnStep = document.getElementById('btn-step');
 const elBtnPlay = document.getElementById('btn-play');
 const elBtnEditDone = document.getElementById('btn-edit-done');
+
+// Initialize audio elements for token sounds (if available in assets/)
+try {
+  for (const k in SOUND_FILES) {
+    try { sounds[k] = new Audio(SOUND_FILES[k]); } catch (e) { /* ignore */ }
+  }
+} catch (e) { /* ignore */ }
+
+// wire up the sound toggle when present
+const elSoundToggle = document.getElementById('sound-toggle');
+if (elSoundToggle) {
+  elSoundToggle.addEventListener('change', () => {
+    soundEnabled = elSoundToggle.checked;
+    if (soundEnabled) {
+      // try to unlock audio by attempting a short play (browsers require a user gesture)
+      const p = sounds['Ook.'] && sounds['Ook.'].play && sounds['Ook.'].play();
+      if (p && typeof p.catch === 'function') p.catch(()=>{});
+    }
+  });
+}
 
 function renderTape() {
   elTape.innerHTML = '';
@@ -459,6 +485,18 @@ function step() {
       if (tape[pointer] !== 0) { ip = parsed.brackets[ip]; }
       break;
   }
+  // play token sound (based on first token of the pair) if enabled
+  try {
+    const tokenIdx = parsed.instructions[ip].tokenA;
+    const tokenStr = parsed.tokens[tokenIdx];
+    if (soundEnabled && tokenStr && sounds[tokenStr]) {
+      const s = sounds[tokenStr];
+      try { s.currentTime = 0; } catch (e) { }
+      const p = s.play();
+      if (p && typeof p.catch === 'function') p.catch(()=>{});
+    }
+  } catch (e) { }
+
   ip++;
   renderTape();
   renderCode();
